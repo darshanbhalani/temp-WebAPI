@@ -28,14 +28,16 @@ namespace temp_WebAPI.Controllers
                     incidents.Add(new OverSpeed
                     {
                         Id = reader.GetInt64(0),
-                        VehicleNo = reader.GetString(1),
-                        Description = reader.GetString(2),
-                        Coordinates = JsonConvert.DeserializeObject<Coordinates>(reader.GetString(3)),
-                        TimeStamp = reader.GetDateTime(4),
+                        VehicleNumber = reader.GetString(1),
+                        ThresholdSpeed = reader.GetInt32(2),
+                        Description = reader.GetString(3),
+                        StartTime = reader.GetDateTime(4),
+                        EndTime = reader.GetDateTime(5),
                     });
                 }
                 return Ok(new { success = true, body = incidents });
             }
         }
+
     }
 }
