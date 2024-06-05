@@ -10,5 +10,7 @@ namespace temp_WebAPI.Models
         public string Description { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
+        public DateTime CreatedOn { get; set; }
+
     }
 }

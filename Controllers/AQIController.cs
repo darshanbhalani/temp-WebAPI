@@ -88,7 +88,8 @@ namespace temp_WebAPI.Controllers
                             Max_Feelslike = reader.GetDouble(reader.GetOrdinal("max_feelslike")),
                             Avg_Feelslike = reader.GetDouble(reader.GetOrdinal("avg_feelslike")),
                             StartTime = reader.GetDateTime(reader.GetOrdinal("starttime")),
-                            EndTime = reader.GetDateTime(reader.GetOrdinal("endtime"))
+                            EndTime = reader.GetDateTime(reader.GetOrdinal("endtime")),
+                             CreatedOn = reader.GetDateTime(reader.GetOrdinal("createdon"))
                         });
                     }
                 }

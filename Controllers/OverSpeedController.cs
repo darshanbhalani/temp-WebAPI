@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Npgsql;
 using temp_WebAPI.Models;
 
@@ -33,6 +32,31 @@ namespace temp_WebAPI.Controllers
                         Description = reader.GetString(3),
                         StartTime = reader.GetDateTime(4),
                         EndTime = reader.GetDateTime(5),
+                        CreatedOn = reader.GetDateTime(6),
+                    });
+                }
+                return Ok(new { success = true, body = incidents });
+            }
+        }
+
+        [HttpPost("SyncNewIncidents")]
+        public async Task<IActionResult> SyncNewIncidents(string lastExecutionTime)
+        {
+            List<OverSpeed> incidents = new List<OverSpeed>();
+            using (var command = new NpgsqlCommand($"select * from syncoverspeedincidents('{lastExecutionTime}')", _connection))
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    incidents.Add(new OverSpeed
+                    {
+                        Id = reader.GetInt64(0),
+                        VehicleNumber = reader.GetString(1),
+                        ThresholdSpeed = reader.GetInt32(2),
+                        Description = reader.GetString(3),
+                        StartTime = reader.GetDateTime(4),
+                        EndTime = reader.GetDateTime(5),
+                        CreatedOn = reader.GetDateTime(6),
                     });
                 }
                 return Ok(new { success = true, body = incidents });
@@ -59,6 +83,7 @@ namespace temp_WebAPI.Controllers
                 return Ok(new { success = true, body = configurations });
             }
         }
+
         [HttpPost("UpdateConfiguration")]
         public async Task<IActionResult> UpdateConfiguration(Configuration newConfiguration)
         {

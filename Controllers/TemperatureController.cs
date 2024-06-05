@@ -27,12 +27,45 @@ namespace temp_WebAPI.Controllers
                 {
                     incidents.Add(new Temperature
                     {
-                        
+                        PollNumber =reader.GetInt64(0),
+                        Area = reader.GetString(1),
+                        Description = reader.GetString(2),
+                        Threshold = reader.GetInt32(3),
+                        Interval = reader.GetInt32(4),
+                        StartTime = reader.GetDateTime(5),
+                        EndTime = reader.GetDateTime(6),
+                        CreatedOn = reader.GetDateTime(7),
                     });
                 }
                 return Ok(new { success = true, body = incidents });
             }
         }
+
+        [HttpPost("SyncNewIncidents")]
+        public async Task<IActionResult> SyncNewIncidents(string lastExecutionTime)
+        {
+            List<Temperature> incidents = new List<Temperature>();
+            using (var command = new NpgsqlCommand($"select * from synctemperatureincidents('{lastExecutionTime}')", _connection))
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    incidents.Add(new Temperature
+                    {
+                        PollNumber = reader.GetInt64(0),
+                        Area = reader.GetString(1),
+                        Description = reader.GetString(2),
+                        Threshold = reader.GetInt32(3),
+                        Interval = reader.GetInt32(4),
+                        StartTime = reader.GetDateTime(5),
+                        EndTime = reader.GetDateTime(6),
+                        CreatedOn = reader.GetDateTime(7),
+                    });
+                }
+                return Ok(new { success = true, body = incidents });
+            }
+        }
+
         [HttpGet("GetAllConfigurations")]
         public async Task<IActionResult> GetAllConfigurations()
         {
