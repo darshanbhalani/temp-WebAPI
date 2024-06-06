@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 using temp_WebAPI.Models;
 
@@ -19,50 +18,80 @@ namespace temp_WebAPI.Controllers
         [HttpGet("GetAllIncidents")]
         public async Task<IActionResult> GetAllIncidents()
         {
-            List<Temperature> incidents = new List<Temperature>();
-            using (var command = new NpgsqlCommand("select * from getalltemperatureincidents()", _connection))
-            using (var reader = command.ExecuteReader())
+            try
             {
-                while (reader.Read())
+                List<Temperature> incidents = new List<Temperature>();
+                using (var command = new NpgsqlCommand("select * from getalltemperatureincidents()", _connection))
+                using (var reader = command.ExecuteReader())
                 {
-                    incidents.Add(new Temperature
+                    while (reader.Read())
                     {
-                        PollNumber =reader.GetInt64(0),
-                        Area = reader.GetString(1),
-                        Description = reader.GetString(2),
-                        Threshold = reader.GetInt32(3),
-                        Interval = reader.GetInt32(4),
-                        StartTime = reader.GetDateTime(5),
-                        EndTime = reader.GetDateTime(6),
-                        CreatedOn = reader.GetDateTime(7),
-                    });
+                        incidents.Add(new Temperature
+                        {
+                            PollNumber = reader.GetInt64(0),
+                            Area = reader.GetString(1),
+                            Description = reader.GetString(2),
+                            Threshold = reader.GetInt32(3),
+                            Interval = reader.GetInt32(4),
+                            StartTime = reader.GetDateTime(5),
+                            EndTime = reader.GetDateTime(6),
+                            CreatedOn = reader.GetDateTime(7),
+                        });
+                    }
+                    return Ok(new { success = true, lastExecutionTime = incidents.Max(d => d.CreatedOn), body = incidents });
                 }
-                return Ok(new { success = true, body = incidents });
+            }
+            catch(NpgsqlException nex)
+            {
+                return Ok(new { success = false, error = nex.Message });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { success = false, error = ex.Message });
             }
         }
 
-        [HttpPost("SyncNewIncidents")]
+
+        [HttpGet("SyncNewIncidents")]
         public async Task<IActionResult> SyncNewIncidents(string lastExecutionTime)
         {
-            List<Temperature> incidents = new List<Temperature>();
-            using (var command = new NpgsqlCommand($"select * from synctemperatureincidents('{lastExecutionTime}')", _connection))
-            using (var reader = command.ExecuteReader())
+            try
             {
-                while (reader.Read())
+                List<Temperature> incidents = new List<Temperature>();
+                using (var command = new NpgsqlCommand($"select * from synctemperatureincidents('{lastExecutionTime}')", _connection))
+                using (var reader = command.ExecuteReader())
                 {
-                    incidents.Add(new Temperature
+                    if (reader.Read())
                     {
-                        PollNumber = reader.GetInt64(0),
-                        Area = reader.GetString(1),
-                        Description = reader.GetString(2),
-                        Threshold = reader.GetInt32(3),
-                        Interval = reader.GetInt32(4),
-                        StartTime = reader.GetDateTime(5),
-                        EndTime = reader.GetDateTime(6),
-                        CreatedOn = reader.GetDateTime(7),
-                    });
+                        while (reader.Read())
+                        {
+                            incidents.Add(new Temperature
+                            {
+                                PollNumber = reader.GetInt64(0),
+                                Area = reader.GetString(1),
+                                Description = reader.GetString(2),
+                                Threshold = reader.GetInt32(3),
+                                Interval = reader.GetInt32(4),
+                                StartTime = reader.GetDateTime(5),
+                                EndTime = reader.GetDateTime(6),
+                                CreatedOn = reader.GetDateTime(7),
+                            });
+                        }
+                        return Ok(new { success = true, lastExecutionTime = incidents.Max(d => d.CreatedOn), body = incidents });
+                    }
+                    else
+                    {
+                        return Ok(new { success = true, lastExecutionTime = lastExecutionTime, body = incidents });
+                    }
                 }
-                return Ok(new { success = true, body = incidents });
+            }
+            catch (NpgsqlException nex)
+            {
+                return Ok(new { success = false, error = nex.Message });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { success = false, error = ex.Message });
             }
         }
 

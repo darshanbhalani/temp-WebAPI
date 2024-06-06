@@ -35,32 +35,52 @@ namespace temp_WebAPI.Controllers
                         CreatedOn = reader.GetDateTime(6),
                     });
                 }
-                return Ok(new { success = true, body = incidents });
+                return Ok(new { success = true, lastExecutionTime = incidents.Max(d => d.CreatedOn), body = incidents });
             }
         }
 
-        [HttpPost("SyncNewIncidents")]
+        [HttpGet("SyncNewIncidents")]
         public async Task<IActionResult> SyncNewIncidents(string lastExecutionTime)
         {
-            List<OverSpeed> incidents = new List<OverSpeed>();
-            using (var command = new NpgsqlCommand($"select * from syncoverspeedincidents('{lastExecutionTime}')", _connection))
-            using (var reader = command.ExecuteReader())
+            try
             {
-                while (reader.Read())
+                List<OverSpeed> incidents = new List<OverSpeed>();
+                using (var command = new NpgsqlCommand($"select * from syncoverspeedincidents('{lastExecutionTime}')", _connection))
+                using (var reader = command.ExecuteReader())
                 {
-                    incidents.Add(new OverSpeed
+                    if (reader.Read())
                     {
-                        Id = reader.GetInt64(0),
-                        VehicleNumber = reader.GetString(1),
-                        ThresholdSpeed = reader.GetInt32(2),
-                        Description = reader.GetString(3),
-                        StartTime = reader.GetDateTime(4),
-                        EndTime = reader.GetDateTime(5),
-                        CreatedOn = reader.GetDateTime(6),
-                    });
+                        while (reader.Read())
+                        {
+                            incidents.Add(new OverSpeed
+                            {
+                                Id = reader.GetInt64(0),
+                                VehicleNumber = reader.GetString(1),
+                                ThresholdSpeed = reader.GetInt32(2),
+                                Description = reader.GetString(3),
+                                StartTime = reader.GetDateTime(4),
+                                EndTime = reader.GetDateTime(5),
+                                CreatedOn = reader.GetDateTime(6),
+                            });
+                        }
+                        return Ok(new { success = true, lastExecutionTime = incidents.Max(d => d.CreatedOn), body = incidents });
+                    }
+                    else
+                    {
+                        return Ok(new { success = true, lastExecutionTime = lastExecutionTime, body = incidents });
+
+                    }
                 }
-                return Ok(new { success = true, body = incidents });
             }
+            catch (NpgsqlException pex)
+            {
+                return Ok(new { success = true, error = pex.Message });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { success = true,error= ex.Message});
+            }
+           
         }
 
         [HttpGet("GetAllConfigurations")]
