@@ -171,9 +171,8 @@ namespace temp_WebAPI.Controllers
         {
             try
             {
-                using (var cmd = new NpgsqlCommand("SELECT updateaqiParameters(@in_category_breakpoints, @in_pm10_breakpoints, @in_pm25_breakpoints, @in_no2_breakpoints, @in_o3_breakpoints, @in_co_breakpoints, @in_so2_breakpoints, @in_nh3_breakpoints, @in_pb_breakpoints)", _connection))
+                using (var cmd = new NpgsqlCommand("SELECT updateaqiParameters(@in_pm10_breakpoints, @in_pm25_breakpoints, @in_no2_breakpoints, @in_o3_breakpoints, @in_co_breakpoints, @in_so2_breakpoints, @in_nh3_breakpoints, @in_pb_breakpoints)", _connection))
                 {
-                    cmd.Parameters.AddWithValue("in_category_breakpoints", NpgsqlTypes.NpgsqlDbType.Double | NpgsqlTypes.NpgsqlDbType.Array, configuration.CategoriesRange.ToArray());
                     cmd.Parameters.AddWithValue("in_pm10_breakpoints", NpgsqlTypes.NpgsqlDbType.Double | NpgsqlTypes.NpgsqlDbType.Array, configuration.PM10Breakpoints.ToArray());
                     cmd.Parameters.AddWithValue("in_pm25_breakpoints", NpgsqlTypes.NpgsqlDbType.Double | NpgsqlTypes.NpgsqlDbType.Array, configuration.PM25Breakpoints.ToArray());
                     cmd.Parameters.AddWithValue("in_no2_breakpoints", NpgsqlTypes.NpgsqlDbType.Double | NpgsqlTypes.NpgsqlDbType.Array, configuration.NO2Breakpoints.ToArray());
