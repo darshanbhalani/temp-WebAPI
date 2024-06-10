@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Confluent.Kafka;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Npgsql;
@@ -157,6 +159,41 @@ namespace temp_WebAPI.Controllers
             catch (NpgsqlException nex)
             {
                 return Ok(new { success = false, error = nex.Message });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { success = false, error = ex.Message });
+            }
+        }
+
+        [HttpPost("UpdateConfiguration")]
+        public async Task<IActionResult> UpdateConfiguration(AQIConfiguration configuration)
+        {
+            try
+            {
+                using (var cmd = new NpgsqlCommand("SELECT updateaqiParameters(@in_category_breakpoints, @in_pm10_breakpoints, @in_pm25_breakpoints, @in_no2_breakpoints, @in_o3_breakpoints, @in_co_breakpoints, @in_so2_breakpoints, @in_nh3_breakpoints, @in_pb_breakpoints)", _connection))
+                {
+                    cmd.Parameters.AddWithValue("in_category_breakpoints", NpgsqlTypes.NpgsqlDbType.Double | NpgsqlTypes.NpgsqlDbType.Array, configuration.CategoriesRange.ToArray());
+                    cmd.Parameters.AddWithValue("in_pm10_breakpoints", NpgsqlTypes.NpgsqlDbType.Double | NpgsqlTypes.NpgsqlDbType.Array, configuration.PM10Breakpoints.ToArray());
+                    cmd.Parameters.AddWithValue("in_pm25_breakpoints", NpgsqlTypes.NpgsqlDbType.Double | NpgsqlTypes.NpgsqlDbType.Array, configuration.PM25Breakpoints.ToArray());
+                    cmd.Parameters.AddWithValue("in_no2_breakpoints", NpgsqlTypes.NpgsqlDbType.Double | NpgsqlTypes.NpgsqlDbType.Array, configuration.NO2Breakpoints.ToArray());
+                    cmd.Parameters.AddWithValue("in_o3_breakpoints", NpgsqlTypes.NpgsqlDbType.Double | NpgsqlTypes.NpgsqlDbType.Array, configuration.O3Breakpoints.ToArray());
+                    cmd.Parameters.AddWithValue("in_co_breakpoints", NpgsqlTypes.NpgsqlDbType.Double | NpgsqlTypes.NpgsqlDbType.Array, configuration.COBreakpoints.ToArray());
+                    cmd.Parameters.AddWithValue("in_so2_breakpoints", NpgsqlTypes.NpgsqlDbType.Double | NpgsqlTypes.NpgsqlDbType.Array, configuration.SO2Breakpoints.ToArray());
+                    cmd.Parameters.AddWithValue("in_nh3_breakpoints", NpgsqlTypes.NpgsqlDbType.Double | NpgsqlTypes.NpgsqlDbType.Array, configuration.NH3Breakpoints.ToArray());
+                    cmd.Parameters.AddWithValue("in_pb_breakpoints", NpgsqlTypes.NpgsqlDbType.Double | NpgsqlTypes.NpgsqlDbType.Array, configuration.PBBreakpoints.ToArray());
+
+                    var result = await cmd.ExecuteScalarAsync();
+                }
+                return Json(new { success = true, message = new { message = "Configuration details updated successfully." } });
+            }
+            catch (NpgsqlException nex)
+            {
+                return Ok(new
+                {
+                    success = false,
+                    error = nex.Message
+                });
             }
             catch (Exception ex)
             {

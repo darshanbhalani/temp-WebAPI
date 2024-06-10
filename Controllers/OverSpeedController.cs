@@ -80,7 +80,6 @@ namespace temp_WebAPI.Controllers
             {
                 return Ok(new { success = true,error= ex.Message});
             }
-           
         }
 
         [HttpGet("GetAllConfigurations")]
