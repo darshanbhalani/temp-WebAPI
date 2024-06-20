@@ -28,11 +28,15 @@ namespace temp_WebAPI.Controllers
                     {
                         Id = reader.GetInt64(0),
                         VehicleNumber = reader.GetString(1),
-                        ThresholdSpeed = reader.GetInt32(2),
-                        Description = reader.GetString(3),
-                        StartTime = reader.GetDateTime(4),
-                        EndTime = reader.GetDateTime(5),
-                        CreatedOn = reader.GetDateTime(6),
+                        AverageSpeed=reader.GetDouble(2),
+                        ThresholdSpeed = reader.GetInt32(3),
+                        Interval = reader.GetInt32(4),
+                        StartTime = reader.GetDateTime(5),
+                        EndTime = reader.GetDateTime(6),
+                        Authority=reader.GetString(7),
+                        City=reader.GetString(8),
+                        State=reader.GetString(9),
+                        CreatedOn = reader.GetDateTime(10),
                     });
                 }
                 return Ok(new { success = true, lastExecutionTime = incidents.Max(d => d.CreatedOn), body = incidents });
@@ -56,11 +60,15 @@ namespace temp_WebAPI.Controllers
                             {
                                 Id = reader.GetInt64(0),
                                 VehicleNumber = reader.GetString(1),
-                                ThresholdSpeed = reader.GetInt32(2),
-                                Description = reader.GetString(3),
-                                StartTime = reader.GetDateTime(4),
-                                EndTime = reader.GetDateTime(5),
-                                CreatedOn = reader.GetDateTime(6),
+                                AverageSpeed = reader.GetDouble(2),
+                                ThresholdSpeed = reader.GetInt32(3),
+                                Interval = reader.GetInt32(4),
+                                StartTime = reader.GetDateTime(5),
+                                EndTime = reader.GetDateTime(6),
+                                Authority = reader.GetString(7),
+                                City = reader.GetString(8),
+                                State = reader.GetString(9),
+                                CreatedOn = reader.GetDateTime(10),
                             });
                         }
                         return Ok(new { success = true, lastExecutionTime = incidents.Max(d => d.CreatedOn), body = incidents });
