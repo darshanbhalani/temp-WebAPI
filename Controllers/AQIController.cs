@@ -199,5 +199,43 @@ namespace temp_WebAPI.Controllers
                 return Ok(new { success = false, error = ex.Message });
             }
         }
+
+        [HttpPost("UpdateOneConfiguration")]
+
+        public async Task<IActionResult> UpdateOneConfiguration(string compound, double[] breakpoints)
+        {
+            try
+            {
+                string sql = $"SELECT updateaqiParameter1('{compound}', @in_breakpoints)";
+
+                using (var cmd = new NpgsqlCommand(sql, _connection))
+                {
+                    cmd.Parameters.AddWithValue("in_breakpoints", NpgsqlTypes.NpgsqlDbType.Double | NpgsqlTypes.NpgsqlDbType.Array, breakpoints);
+
+                    var result = await cmd.ExecuteScalarAsync();
+                    Console.WriteLine("The result is : " + result);
+                    if ((bool)result)
+                    {
+                        return Json(new { success = true, message = "Configuration details updated successfully." });
+                    }
+                    else
+                    {
+                        return Json(new { success = false, error = "Failed to update configuration." });
+                    }
+                }
+            }
+            catch (NpgsqlException nex)
+            {
+                return Ok(new
+                {
+                    success = false,
+                    error = nex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { success = false, error = ex.Message });
+            }
+        }
     }
 }
